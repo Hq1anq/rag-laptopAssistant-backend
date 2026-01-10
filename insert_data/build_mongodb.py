@@ -1,14 +1,19 @@
 import pandas as pd
 from pymongo import MongoClient
 from sentence_transformers import SentenceTransformer
-import os
+import os, logging
 from dotenv import load_dotenv
-from utils.data import csv_exists, DataNotFoundError, check_mongodb_connection
+from utils.data import csv_exists, DataNotFoundError
 
 load_dotenv()
+logging.getLogger("transformers").setLevel(logging.ERROR)
+
+# Tỷ giá chuyển đổi Indian Rupee -> VNĐ
+INR_TO_VND = 291.15
+MODEL_PATH = "./gte-multilingual-base"
 
 # Khởi tạo model giống như trong dự án
-model = SentenceTransformer('Alibaba-NLP/gte-multilingual-base', trust_remote_code=True)
+model = SentenceTransformer(MODEL_PATH, trust_remote_code=True)
 
 def upload_laptop_data(csv_path: str):
     if csv_exists(file_name=csv_path):
@@ -16,9 +21,12 @@ def upload_laptop_data(csv_path: str):
     else:
         raise DataNotFoundError
     
-    # Đổi tên cột đầu tiên thành _id (nếu cần)
-    if df.columns[0] == 'Unnamed: 0' or df.columns[0] == '':
+    # Đổi tên cột đầu tiên thành _id
+    if df.columns[0] == 'Unnamed: 0':
         df.rename(columns={df.columns[0]: '_id'}, inplace=True)
+    
+    # Chuyển đổi cột price sang VNĐ
+    df['price'] = df['price'] * INR_TO_VND
 
     # Tạo combined_information từ các cột (giống logic build_chromadb.py)
     cols = [c for c in df.columns if c not in ['_id', 'image', 'embedding']]
@@ -30,6 +38,7 @@ def upload_laptop_data(csv_path: str):
     # Kết nối và đẩy dữ liệu lên MongoDB
     client = MongoClient(os.getenv("MONGODB_URI"))
     collection = client[os.getenv("MONGODB_NAME")][os.getenv("MONGODB_COLLECTION")]
+    collection.delete_many({}) # Xóa toàn bộ document hiện có
     
     documents = []
     for i, row in df.iterrows():
@@ -41,5 +50,4 @@ def upload_laptop_data(csv_path: str):
     print(f"Đã đẩy thành công {len(documents)} laptop lên MongoDB Atlas.")
 
 if __name__ == "__main__":
-    check_mongodb_connection()
     upload_laptop_data('data/laptop.csv')
