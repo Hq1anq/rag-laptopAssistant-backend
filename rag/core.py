@@ -111,7 +111,7 @@ class RAG():
                     "index": "vector_index",
                     "queryVector": query_embedding,
                     "path": "embedding",
-                    "numCandidates": 400,
+                    "numCandidates": 200, # cho dataset laptop 893 items
                     "limit": limit,
                 }
             }
@@ -123,11 +123,18 @@ class RAG():
             project_stage = {
                 "$project": {
                     "_id": 1,  
-                    "title": 1, 
-                    # "product_specs": 1,
-                    "color_options": 1,
-                    "current_price": 1,
-                    "product_promotion": 1,
+                    "brand": 1, 
+                    "name": 1,
+                    "price": 1,
+                    "processor": 1,
+                    "CPU": 1,
+                    "Ram": 1,
+                    "Ram_type": 1,
+                    "ROM": 1,
+                    "ROM_type": 1,
+                    "GPU": 1,
+                    "display_size": 1,
+                    "combined_information": 1, # Rất quan trọng cho RAG
                     "score": {
                         "$meta": "vectorSearchScore"
                     }
