@@ -13,12 +13,18 @@ class Reflection():
     def __call__(self, chatHistory):
         history_string = self._concat_and_format_texts(chatHistory)
 
-        prompt = """Hệ thống đang hỗ trợ tư vấn laptop. Dựa trên lịch sử trò chuyện và câu hỏi mới nhất của người dùng (có thể chứa các từ thay thế như 'nó', 'con này', 'máy đó'), hãy tạo lại một câu hỏi độc lập bằng tiếng Việt sao cho người đọc có thể hiểu được nội dung mà không cần xem lại lịch sử. 
-        LƯU Ý: CHỈ TRẢ VỀ CÂU HỎI ĐÃ ĐƯỢC TỐI ƯU, KHÔNG GIẢI THÍCH GÌ THÊM.
+        prompt = f"""Bạn là một chuyên gia phân tích ngữ cảnh hội thoại. 
+        Nhiệm vụ của bạn là kiểm tra xem câu hỏi mới nhất có liên quan đến các đối tượng Laptop đã thảo luận trong lịch sử hay không.
 
-        Lịch sử trò chuyện:
-        {historyString}
-        """.format(historyString=history_string)
+        LỊCH SỬ CHAT:
+        {history_string}
+
+        QUY TẮC XỬ LÝ:
+        1. Nếu câu hỏi mới sử dụng đại từ (nó, con này, cái đấy, giá, màu sắc...) liên quan đến Laptop trong lịch sử -> Hãy tạo lại một câu hỏi độc lập bằng tiếng Việt sao cho người đọc có thể hiểu được nội dung mà không cần xem lại lịch sử. 
+        2. Nếu câu hỏi mới là một câu tán gẫu, chào hỏi hoặc hoàn toàn KHÔNG liên quan đến Laptop (ví dụ: "Bạn tên gì?", "Ăn cơm chưa?", "Thời tiết sao rồi?") -> Bạn phải TRẢ VỀ NGUYÊN VĂN câu hỏi mới, không được thêm thắt thông tin laptop vào.
+
+        CHỈ TRẢ VỀ CÂU HỎI CUỐI CÙNG, KHÔNG GIẢI THÍCH.
+        """
 
         higherLevelSummariesPrompt = {
             "role": "user",
