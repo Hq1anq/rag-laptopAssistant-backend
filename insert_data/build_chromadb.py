@@ -1,30 +1,8 @@
 import pandas as pd
-import ast  # To safely parse string to list
 import chromadb
-from chromadb.config import Settings
 from sentence_transformers import SentenceTransformer
 import argparse
-import os 
-
-class DataNotFoundError(Exception):
-    def __init__(self):
-        super().__init__(f"Please make sure you have valid CSV file")
-
-def csv_exists(file_name: str) -> bool:
-    """
-    Check if a CSV file exists.
-
-    Args:
-        filename (str): Absolute path of the file (e.g., "C:/Users/products.csv")
-
-    Returns:
-        bool: True if file exists, False otherwise
-    """
-    if not file_name.endswith(".csv"):
-        raise ValueError("Filename must end with .csv")
-    
-    return os.path.isfile(file_name)
-
+from utils.data import csv_exists, DataNotFoundError
 
 def load_csv_to_chromadb(csv_path: str, persist_dir: str = "./chroma_db", model_name: str = "Alibaba-NLP/gte-multilingual-base"):
     # Load CSV
